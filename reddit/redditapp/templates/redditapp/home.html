@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p>Hello {{ user.username }}!</p>
+{% if latest_question_list %}
+<ul>
+  {% for question in latest_question_list %}
+  <li><a href="/redditapp/{{ question.id }}/">{{ question.question_text }}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No questions are available.</p>
+{% endif %}
+<a href="/redditapp/ask_question">Ask New Question</a>
+{% endblock %}

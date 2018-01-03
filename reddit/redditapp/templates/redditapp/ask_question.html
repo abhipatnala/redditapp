@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<form action="{% url 'redditapp:add_question' %}" method="post">
+{% csrf_token %}
+    <input type="textarea" name="new_question" id="question{{ forloop.counter }}" value="{{ question.id }}" />
+<input type="submit" value="ask question" />
+</form>
+
+{% endblock %}
+

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>{{ question.question_text }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'redditapp:comment' question.id %}" method="post">
+  {% csrf_token %}
+  {% for comment in question.comment_set.all %}
+  <label for="comment{{ forloop.counter }}">{{ comment.comment_text }}</label><br />
+  {% endfor %}
+  <input type="textarea" name="comments" id="comment{{ forloop.counter }}" value="{{ comment.id }}" />
+  <input type="hidden" name="next" value="{{ request.path }}">
+  <input type="submit" value="Comment" />
+</form>
+<form action="{% url 'redditapp:add_vote' question.id %}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.path }}">
+  {% if is_voted %}
+  <button type="button" disabled>Voted</button>
+  {% else %}
+  <input type="submit" value="Vote" />
+  {% endif %}
+</form>
+<label>Total Votes: {{ total_vote_count }} </label>
+
+{% endblock %}
+
