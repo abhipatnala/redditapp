@@ -21,59 +21,60 @@ def home(request):
 
 def detail(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    is_voted = Vote.is_voted(question_id, request.user)
-
-    total_vote_count = Vote.objects.filter(question_id=question).count()
     context = {
-            'question':question,
-            'is_voted':is_voted,
-            'total_vote_count':total_vote_count,
-            }
+        'question': question,
+        'is_voted': question.is_voted(request.user),
+        'total_vote_count': question.vote_set.count(),
+    }
     return render(request, 'redditapp/detail.html', context)
 
 
-def comment(request,question_id):
-    question = Question.objects.get(pk= question_id)
+def comment(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
 
     if request.method == "POST":
-      MyCommentForm = CommentForm(request.POST)
+        comment_form = CommentForm(request.POST)
 
-      if MyCommentForm.is_valid():
-         c_text = MyCommentForm.cleaned_data['comments']
-         new_comment = Comment(question_id=question, comment_text = c_text,auth_user= request.user)
-         new_comment.save()
+        if comment_form.is_valid():
+            c_text = comment_form.cleaned_data['comments']
+            Comment.objects.create(
+                question_id=question,
+                comment_text=c_text,
+                auth_user=request.user
+            )
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
 
 
 def add_question(request):
-
     if request.method == "POST":
-        MyQuestionForm =  QuestionForm(request.POST)
+        question_form = QuestionForm(request.POST)
 
-    if MyQuestionForm.is_valid():
-        q_text = MyQuestionForm.cleaned_data['new_question']
-        new_ques = Question(question_text = q_text,author = request.user)
-        new_ques.save()
+        if question_form.is_valid():
+            q_text = question_form.cleaned_data['new_question']
+            Question.objects.create(question_text=q_text, author=request.user)
+
     return redirect('home')
 
+
 def ask_question(request):
+    return render(request, 'redditapp/ask_question.html')
 
-    return render(request,'redditapp/ask_question.html')
 
-def add_vote(request,question_id):
+def add_vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    new_vote = Vote(question_id = question,voter = request.user)
-    new_vote.save()
+    if not question.is_voted(request.user):
+        Vote.objects.create(question_id=question, voter=request.user)
     next = request.POST.get('next', '/')
-
     return HttpResponseRedirect(next)
+
 
 def custom_login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('/home')
     else:
         return login(request)
+
 
 def logout(request):
     """Logs out user"""
