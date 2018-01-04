@@ -14,21 +14,18 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
-from django.urls import include, path
+from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
-from reddit.redditapp import views as app_views
+from redditapp import views as app_views
 
 urlpatterns = [
-        url(r'^home/', app_views.home, name='home'),
-        path('redditapp/', include('reddit.redditapp.urls')),
-        # url(r'^redditapp''/<int:question_id>/', app_views.detail, name='detail'),
+        url(r'^home$', app_views.home, name='home'),
+        path('redditapp/', include('redditapp.urls')),
         url(r'^login/', app_views.custom_login, name='login'),
-        url(r'^logout/$', app_views.logout, name='logout'),
-        url(r'^oauth/', include('social_django.urls', namespace='social')),  # <--
-        url(r'^admin/', admin.site.urls),
-        url(r'^',app_views.custom_login,name = 'login'),
+        url(r'^logout', app_views.logout, name='logout'),
+        url(r'^oauth/', include('social_django.urls', namespace='social')),
+        url(r'^admin', admin.site.urls),
+        url(r'^$', app_views.custom_login, name='login'),
         ]
-
-

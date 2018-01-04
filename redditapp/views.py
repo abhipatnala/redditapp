@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse,HttpResponseRedirect
 
-from .models import Question,Comment,CommentForm,QuestionForm,Vote
-from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 from django.contrib.auth.views import login
 from django.contrib.auth import logout as auth_logout
+from django.shortcuts import get_object_or_404, render, redirect
 
-import pdb
+from redditapp.models import Question, Comment, CommentForm, QuestionForm, Vote
 
 
-from django.shortcuts import get_object_or_404, render,redirect
 @login_required
 def home(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
@@ -20,17 +18,19 @@ def home(request):
             }
     return render(request, 'redditapp/home.html', context)
 
+
 def detail(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    is_voted = True if Vote.objects.filter(question_id=question, voter=request.user).count() > 0 else False
+    is_voted = Vote.is_voted(question_id, request.user)
 
-    total_vote_count =  Vote.objects.filter(question_id=question).count()
+    total_vote_count = Vote.objects.filter(question_id=question).count()
     context = {
             'question':question,
             'is_voted':is_voted,
             'total_vote_count':total_vote_count,
             }
     return render(request, 'redditapp/detail.html', context)
+
 
 def comment(request,question_id):
     question = Question.objects.get(pk= question_id)
@@ -44,6 +44,7 @@ def comment(request,question_id):
          new_comment.save()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
+
 
 def add_question(request):
 
